@@ -42,7 +42,7 @@ function getLeaderboard(PDO $pdo): array {
     $stmt = $pdo->query("SELECT student_name, score, answered, completed, lives_left, played_at
                          FROM scores
                          ORDER BY score DESC, completed DESC, lives_left DESC, played_at ASC
-                         LIMIT 10");
+                         LIMIT 50");
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
@@ -114,36 +114,7 @@ try {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>-ED past pronunciation</title>
-<style>
-:root{
-  --ink:#17324d; --muted:#66788a; --paper:#fff; --line:#dbe8f2;
-  --blue:#367bf5; --red:#f05d5e; --green:#53c68c; --yellow:#ffd166;
-  --good:#167a49; --bad:#b9353b; --shadow:0 18px 45px rgba(26,58,91,.16);
-}
-*{box-sizing:border-box}
-body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:
-radial-gradient(circle at 15% 12%,#dff1ff 0 12%,transparent 13%),
-radial-gradient(circle at 88% 18%,#fff0b8 0 10%,transparent 11%),
-linear-gradient(135deg,#eef8ff,#fff9e8);padding:18px;display:grid;place-items:center}
-.game{width:min(900px,100%);background:rgba(255,255,255,.96);border:3px solid #d8e9f5;border-radius:30px;box-shadow:var(--shadow);overflow:hidden}
-header{padding:20px 22px 10px;text-align:center}
-h1{margin:0;font-size:clamp(30px,5vw,46px);letter-spacing:-1px}.subtitle{margin:6px 0;color:var(--muted);font-weight:700}
-.screen{padding:18px 24px 28px}.hidden{display:none!important}
-.start-card,.level-card,.end-card{max-width:610px;margin:8px auto 18px;text-align:center;background:#f9fcff;border:2px solid var(--line);border-radius:24px;padding:28px}
-.start-card h2,.level-card h2,.end-card h2{margin:0 0 10px;font-size:clamp(28px,5vw,40px)}
-.name-row{display:flex;gap:10px;margin-top:20px}.name-row input{flex:1;min-width:0;border:2px solid #bcd3e5;border-radius:16px;padding:14px 16px;font-size:19px;font-weight:700;outline:none}.name-row input:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(54,123,245,.12)}
-.primary{border:0;border-radius:16px;background:var(--ink);color:#fff;padding:14px 20px;font-size:17px;font-weight:900;cursor:pointer}.primary:hover{filter:brightness(1.08)}.scores-link{display:inline-block;margin-top:18px;color:#265cb6;font-weight:850;text-decoration:underline;cursor:pointer;background:none;border:0;font-size:15px}
-.rules{margin:18px auto 0;text-align:left;max-width:470px;color:#4b6075;line-height:1.55}.rules strong{color:var(--ink)}
-.topbar{display:grid;grid-template-columns:1.3fr repeat(4,1fr);gap:9px;margin-bottom:14px}.stat{background:#f7fbff;border:2px solid #e1ecf4;border-radius:16px;padding:9px;text-align:center;font-weight:900;min-width:0}.stat span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}.stat b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lives{font-size:20px;letter-spacing:2px;color:#e64650}
-.progress-shell{margin:12px 0 20px}.progress-label{display:flex;justify-content:space-between;font-size:13px;font-weight:800;color:var(--muted);margin-bottom:6px}.progress{height:12px;background:#e9eff4;border-radius:999px;overflow:hidden}.progress>div{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--green));transition:width .25s ease}
-.prompt{background:#f8fbff;border:2px dashed #abc5dc;border-radius:24px;padding:30px 18px;text-align:center}.prompt small{display:block;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}#word{font-size:clamp(46px,10vw,78px);font-weight:950;line-height:1;letter-spacing:-2px}.speak{margin-top:15px;border:0;background:#e9f1ff;color:#17324d;border-radius:999px;padding:10px 16px;font-weight:900;cursor:pointer}
-.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}.choice{border:0;border-radius:20px;padding:18px 10px;color:#fff;font-size:clamp(27px,5vw,39px);font-weight:950;cursor:pointer;box-shadow:0 7px 0 rgba(0,0,0,.12);transition:transform .08s,filter .08s}.choice:hover{filter:brightness(1.05)}.choice:active{transform:translateY(4px);box-shadow:0 3px 0 rgba(0,0,0,.12)}.choice:disabled{cursor:default;opacity:.72}.t{background:var(--blue)}.d{background:var(--red)}.id{background:var(--green);color:#113b29}
-#feedback{min-height:58px;margin-top:16px;display:grid;place-items:center;text-align:center;font-size:19px;font-weight:900}#feedback.good{color:var(--good)}#feedback.bad{color:var(--bad)}
-.tip{margin-top:10px;background:#fff8d8;border:2px solid #f0df90;border-radius:16px;padding:11px 13px;color:#5b4c13;font-size:14px;line-height:1.4}.mini{color:var(--muted);font-size:14px}.big-score{font-size:42px;font-weight:950;margin:10px 0}.level-badge{display:inline-block;background:#e9f1ff;border:2px solid #c8dcff;border-radius:999px;padding:7px 13px;font-weight:900;color:#265cb6;margin-bottom:10px}
-.leaderboard{margin:22px auto 0;max-width:610px;text-align:left}.leaderboard h3{margin:0 0 5px;text-align:center;font-size:24px}.reset-note{text-align:center;color:var(--muted);font-size:13px;font-weight:800;margin:0 0 10px}.score-list{margin:0;padding:0;list-style:none;border:2px solid var(--line);border-radius:18px;overflow:hidden;background:#fff}.score-row{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;padding:10px 13px;border-bottom:1px solid var(--line);font-weight:850}.score-row:last-child{border-bottom:0}.score-row .rank{font-size:20px;text-align:center}.score-row .score{font-size:18px;color:#265cb6}.score-row.me{background:#fff8d8}.empty-board{text-align:center;padding:18px;color:var(--muted);font-weight:750}.board-status{text-align:center;color:var(--muted);font-size:13px;margin-top:8px}
-.name-error{min-height:20px;margin-top:8px;color:var(--bad);font-size:13px;font-weight:800}.copyright{text-align:center;padding:10px 18px 16px;color:var(--muted);font-size:12px;font-weight:700}.copyright a{display:inline-flex;align-items:center;gap:4px;color:inherit;text-decoration:none}.copyright a:hover{text-decoration:underline}.github-icon{width:11px;height:11px;fill:currentColor;flex:none}
-@media(max-width:700px){.topbar{grid-template-columns:repeat(2,1fr)}.topbar .player{grid-column:1/-1}.choices{grid-template-columns:1fr}.screen{padding-inline:15px}.name-row{flex-direction:column}}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <section class="game" aria-label="Past tense pronunciation game">
@@ -180,11 +151,12 @@ h1{margin:0;font-size:clamp(30px,5vw,46px);letter-spacing:-1px}.subtitle{margin:
       <button class="choice id" data-sound="id">/ɪd/</button>
     </div>
     <div id="feedback" aria-live="polite"></div>
+    <button id="nextVerb" class="primary next-verb hidden" type="button">Next verb →</button>
     <div class="tip"><strong>Tip:</strong> /ɪd/ comes after a final /t/ or /d/ sound. For the other verbs, decide whether the final sound before <em>-ed</em> is voiced or unvoiced.</div>
   </div>
 </div>
 
-<div id="scoresScreen" class="screen hidden"><div class="end-card"><div class="leaderboard" aria-live="polite">
+<div id="scoresScreen" class="screen hidden"><div class="end-card"><button id="backFromScoresTop" class="primary" type="button">Back</button><div class="leaderboard" aria-live="polite">
 <h3>🏅 Best scores</h3><p class="reset-note" id="welcomeResetNote">This list resets every 24 hours.</p>
 <ol class="score-list" id="welcomeScoreList"><li class="empty-board">Loading scores…</li></ol>
 <div class="board-status" id="welcomeBoardStatus"></div></div><button id="backFromScores" class="primary" type="button">Back</button></div></div>
@@ -197,7 +169,7 @@ h1{margin:0;font-size:clamp(30px,5vw,46px);letter-spacing:-1px}.subtitle{margin:
   <div class="board-status" id="boardStatus"></div>
 </div>
 <button id="restart" class="primary" type="button">Play again</button></div></div>
-  <footer class="copyright"><a href="https://github.com/rcutanda/ED-PastPronunciation" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository"><svg class="github-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .5a7.5 7.5 0 0 0-2.37 14.62c.38.07.51-.16.51-.36v-1.46c-2.1.46-2.54-.89-2.54-.89-.34-.87-.84-1.1-.84-1.1-.69-.47.05-.46.05-.46.76.05 1.16.78 1.16.78.68 1.16 1.78.83 2.21.63.07-.49.27-.83.48-1.02-1.67-.19-3.43-.84-3.43-3.72 0-.82.29-1.49.78-2.02-.08-.19-.34-.96.07-2 0 0 .64-.2 2.06.77A7.1 7.1 0 0 1 8 3.52c.64 0 1.27.09 1.87.25 1.43-.97 2.06-.77 2.06-.77.41 1.04.15 1.81.07 2 .49.53.78 1.2.78 2.02 0 2.89-1.76 3.53-3.44 3.72.27.23.51.69.51 1.39v2.63c0 .2.14.43.52.36A7.5 7.5 0 0 0 8 .5Z"/></svg>CC-BY Ramón Cutanda López - v1.0</a></footer>
+  <footer class="copyright"><a href="https://github.com/rcutanda/ED-PastPronunciation" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository"><svg class="github-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .5a7.5 7.5 0 0 0-2.37 14.62c.38.07.51-.16.51-.36v-1.46c-2.1.46-2.54-.89-2.54-.89-.34-.87-.84-1.1-.84-1.1-.69-.47.05-.46.05-.46.76.05 1.16.78 1.16.78.68 1.16 1.78.83 2.21.63.07-.49.27-.83.48-1.02-1.67-.19-3.43-.84-3.43-3.72 0-.82.29-1.49.78-2.02-.08-.19-.34-.96.07-2 0 0 .64-.2 2.06.77A7.1 7.1 0 0 1 8 3.52c.64 0 1.27.09 1.87.25 1.43-.97 2.06-.77 2.06-.77.41 1.04.15 1.81.07 2 .49.53.78 1.2.78 2.02 0 2.89-1.76 3.53-3.44 3.72.27.23.51.69.51 1.39v2.63c0 .2.14.43.52.36A7.5 7.5 0 0 0 8 .5Z"/></svg>CC-BY Ramón Cutanda López - v1.1</a></footer>
 </section>
 <script>
 const allVerbs = <?php echo json_encode($verbs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
@@ -206,14 +178,23 @@ let student='', level=1, qIndex=0, score=0, lives=MAX_LIVES, locked=false, level
 
 const $=id=>document.getElementById(id);
 const startScreen=$('startScreen'), gameScreen=$('gameScreen'), scoresScreen=$('scoresScreen'), levelScreen=$('levelScreen'), endScreen=$('endScreen');
-const wordEl=$('word'), feedbackEl=$('feedback'), barEl=$('bar');
+const wordEl=$('word'), feedbackEl=$('feedback'), barEl=$('bar'), nextVerbBtn=$('nextVerb');
 
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function showOnly(el){[startScreen,gameScreen,scoresScreen,levelScreen,endScreen].forEach(x=>x.classList.toggle('hidden',x!==el))}
-function makeLevelQuestions(lvl){
-  const pool=allVerbs.filter(v=>Number(v.level)===lvl);
-  if(pool.length>=QUESTIONS_PER_LEVEL) return shuffle(pool).slice(0,QUESTIONS_PER_LEVEL);
-  return shuffle(allVerbs).slice(0,QUESTIONS_PER_LEVEL);
+let usedWords = new Set();
+
+function makeLevelQuestions(lvl) {
+  const pool = shuffle(allVerbs.filter(v => Number(v.level) === lvl));
+  const picked = [];
+  for (const v of pool) {
+    const key = v.word.trim().toLowerCase();
+    if (usedWords.has(key)) continue;   // already shown: draw another
+    usedWords.add(key);
+    picked.push(v);
+    if (picked.length === QUESTIONS_PER_LEVEL) break;
+  }
+  return picked;
 }
 function updateStats(){
   $('playerName').textContent=student; $('levelStat').textContent=level+' / '+LEVELS;
@@ -221,24 +202,39 @@ function updateStats(){
   $('scoreStat').textContent=score; $('livesStat').textContent='♥'.repeat(lives)+'♡'.repeat(MAX_LIVES-lives);
   $('progressText').textContent=qIndex+' / '+QUESTIONS_PER_LEVEL; barEl.style.width=(qIndex/QUESTIONS_PER_LEVEL*100)+'%';
 }
-function beginGame(){level=1;qIndex=0;score=0;lives=MAX_LIVES;scoreSaved=false;beginLevel()}
+function beginGame(){level=1;qIndex=0;score=0;lives=MAX_LIVES;scoreSaved=false;usedWords=new Set();beginLevel()}
 function beginLevel(){qIndex=0;levelQuestions=makeLevelQuestions(level);showOnly(gameScreen);showQuestion()}
 function showQuestion(){
-  locked=false; feedbackEl.textContent=''; feedbackEl.className=''; document.querySelectorAll('.choice').forEach(b=>b.disabled=false);
+  locked=false; feedbackEl.textContent=''; feedbackEl.className='';
+  nextVerbBtn.classList.add('hidden');
+  document.querySelectorAll('.choice').forEach(b=>{b.disabled=false;b.classList.remove('correct-answer','wrong-choice','dimmed')});
   wordEl.textContent=levelQuestions[qIndex].word; updateStats();
+}
+function advance(){
+  nextVerbBtn.classList.add('hidden');
+  if(lives<=0){gameOver();return}
+  qIndex++;
+  if(qIndex>=QUESTIONS_PER_LEVEL){completeLevel();return}
+  showQuestion();
 }
 function answer(chosen){
   if(locked)return; locked=true; document.querySelectorAll('.choice').forEach(b=>b.disabled=true);
   const correct=levelQuestions[qIndex].sound;
-  if(chosen===correct){score++;feedbackEl.textContent='✓ Correct!';feedbackEl.className='good'}
-  else{lives--;const label=correct==='id'?'/ɪd/':'/'+correct+'/';feedbackEl.textContent='✗ The correct sound is '+label+'. You lost one life.';feedbackEl.className='bad'}
-  updateStats();
-  setTimeout(()=>{
-    if(lives<=0){gameOver();return}
-    qIndex++;
-    if(qIndex>=QUESTIONS_PER_LEVEL){completeLevel();return}
-    showQuestion();
-  },1100)
+  if(chosen===correct){
+    score++;feedbackEl.textContent='✓ Correct!';feedbackEl.className='good';
+    updateStats();
+    setTimeout(advance,1100);
+  }else{
+    lives--;const label=correct==='id'?'/ɪd/':'/'+correct+'/';
+    feedbackEl.textContent='✗ The correct sound is '+label+'. You lost one life.';feedbackEl.className='bad';
+    document.querySelectorAll('.choice').forEach(b=>{
+      if(b.dataset.sound===correct) b.classList.add('correct-answer');
+      else if(b.dataset.sound===chosen) b.classList.add('wrong-choice');
+      else b.classList.add('dimmed');
+    });
+    updateStats();
+    nextVerbBtn.classList.remove('hidden'); nextVerbBtn.focus();
+  }
 }
 function completeLevel(){
   barEl.style.width='100%'; $('levelBadge').textContent='Level '+level+' complete';
@@ -318,8 +314,10 @@ $('nameForm').addEventListener('submit',async e=>{
 });
 $('nextLevel').addEventListener('click',()=>{level++;beginLevel()});
 $('restart').addEventListener('click',()=>{showOnly(startScreen);$('studentName').focus()});
+nextVerbBtn.addEventListener('click',advance);
 document.querySelectorAll('.choice').forEach(btn=>btn.addEventListener('click',()=>answer(btn.dataset.sound)));
 $('speak').addEventListener('click',()=>{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(levelQuestions[qIndex].word.replace(/[()]/g,''));u.lang='en-GB';u.rate=.78;speechSynthesis.speak(u)});
+document.getElementById('backFromScoresTop').addEventListener('click', () => document.getElementById('backFromScores').click());
 </script>
 </body>
 </html>
